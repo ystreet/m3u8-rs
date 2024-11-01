@@ -872,9 +872,9 @@ impl Default for MediaPlaylistType {
 /// is specified by a URI and optionally a byte range.
 #[derive(Debug, Default, PartialEq, Clone)]
 pub struct MediaSegment {
-    pub uri: String,
+    pub uri: Option<String>,
     /// `#EXTINF:<duration>,[<title>]`
-    pub duration: f32,
+    pub duration: Option<f32>,
     /// `#EXTINF:<duration>,[<title>]`
     pub title: Option<String>,
     /// `#EXT-X-BYTERANGE:<n>[@<o>]`
@@ -939,14 +939,16 @@ impl MediaSegment {
             writeln!(w, "{}", unknown_tag)?;
         }
 
-        match WRITE_OPT_FLOAT_PRECISION.load(Ordering::Relaxed) {
-            MAX => {
-                write!(w, "#EXTINF:{},", self.duration)?;
-            }
-            n => {
-                write!(w, "#EXTINF:{:.*},", n, self.duration)?;
-            }
-        };
+        if let Some(ref duration) = self.duration {
+            match WRITE_OPT_FLOAT_PRECISION.load(Ordering::Relaxed) {
+                MAX => {
+                    write!(w, "#EXTINF:{},", duration)?;
+                }
+                n => {
+                    write!(w, "#EXTINF:{:.*},", n, duration)?;
+                }
+            };
+        }
 
         if let Some(ref v) = self.title {
             writeln!(w, "{}", v)?;
@@ -954,7 +956,10 @@ impl MediaSegment {
             writeln!(w)?;
         }
 
-        writeln!(w, "{}", self.uri)
+        if let Some(ref uri) = self.uri {
+            writeln!(w, "{}", uri)?;
+        }
+        Ok(())
     }
 }
 

@@ -209,8 +209,8 @@ fn create_segment_float_inf() {
         end_list: true,
         playlist_type: Some(MediaPlaylistType::Vod),
         segments: vec![MediaSegment {
-            uri: "20140311T113819-01-338559live.ts".into(),
-            duration: 2.000f32,
+            uri: Some("20140311T113819-01-338559live.ts".into()),
+            duration: Some(2.000f32),
             title: Some("title".into()),
             ..Default::default()
         }],
@@ -337,8 +337,8 @@ fn create_and_parse_media_playlist_single_segment() {
     let mut playlist_original = Playlist::MediaPlaylist(MediaPlaylist {
         target_duration: 2,
         segments: vec![MediaSegment {
-            uri: "20140311T113819-01-338559live.ts".into(),
-            duration: 2.002,
+            uri: Some("20140311T113819-01-338559live.ts".into()),
+            duration: Some(2.002),
             title: Some("hey".into()),
             ..Default::default()
         }],
@@ -365,8 +365,8 @@ fn create_and_parse_media_playlist_full() {
         }),
         independent_segments: true,
         segments: vec![MediaSegment {
-            uri: "20140311T113819-01-338559live.ts".into(),
-            duration: 2.002,
+            uri: Some("20140311T113819-01-338559live.ts".into()),
+            duration: Some(2.002),
             title: Some("338559".into()),
             byte_range: Some(ByteRange {
                 length: 137116,
@@ -493,8 +493,8 @@ fn create_and_parse_media_playlist_llhls() {
         }),
         independent_segments: true,
         segments: vec![MediaSegment {
-            uri: "20140311T113819-01-338559live.ts".into(),
-            duration: 2.002,
+            uri: Some("20140311T113819-01-338559live.ts".into()),
+            duration: Some(2.002),
             title: Some("338559".into()),
             byte_range: Some(ByteRange {
                 length: 137116,

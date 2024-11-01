@@ -451,7 +451,7 @@ fn media_playlist_from_tags(mut tags: Vec<MediaPlaylistTag>) -> MediaPlaylist {
             }
             MediaPlaylistTag::Segment(segment_tag) => match segment_tag {
                 SegmentTag::Extinf(d, t) => {
-                    next_segment.duration = d;
+                    next_segment.duration = Some(d);
                     next_segment.title = t;
                 }
                 SegmentTag::ByteRange(b) => {
@@ -475,7 +475,7 @@ fn media_playlist_from_tags(mut tags: Vec<MediaPlaylistTag>) -> MediaPlaylist {
                 SegmentTag::Uri(u) => {
                     next_segment.key = encryption_key.clone();
                     next_segment.map = map.clone();
-                    next_segment.uri = u;
+                    next_segment.uri = Some(u);
                     media_playlist.segments.push(next_segment);
                     next_segment = MediaSegment::empty();
                     encryption_key = None;
@@ -491,6 +491,11 @@ fn media_playlist_from_tags(mut tags: Vec<MediaPlaylistTag>) -> MediaPlaylist {
             },
         }
     }
+
+    if next_segment != MediaSegment::empty() {
+        media_playlist.segments.push(next_segment);
+    }
+
     media_playlist
 }
 
