@@ -781,12 +781,6 @@ impl MediaPlaylist {
         if let Some(ref skip) = self.skip {
             skip.write_to(w)?;
         }
-        if let Some(ref preload_hint) = self.preload_hint {
-            preload_hint.write_to(w)?;
-        }
-        if let Some(ref rendition_report) = self.rendition_report {
-            rendition_report.write_to(w)?;
-        }
 
         writeln!(w, "#EXT-X-TARGETDURATION:{}", self.target_duration)?;
 
@@ -812,8 +806,14 @@ impl MediaPlaylist {
         for segment in &self.segments {
             segment.write_to(w)?;
         }
+        if let Some(ref preload_hint) = self.preload_hint {
+            preload_hint.write_to(w)?;
+        }
         if self.end_list {
             writeln!(w, "#EXT-X-ENDLIST")?;
+        }
+        if let Some(ref rendition_report) = self.rendition_report {
+            rendition_report.write_to(w)?;
         }
 
         for unknown_tag in &self.unknown_tags {
