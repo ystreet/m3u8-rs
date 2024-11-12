@@ -28,6 +28,27 @@ macro_rules! write_some_attribute_quoted {
 }
 
 macro_rules! write_some_float_attribute {
+    ($w:expr, $tag:expr, $o:expr, $comma:expr) => {
+        if *$comma {
+            if let &Some(ref v) = $o {
+                match WRITE_OPT_FLOAT_PRECISION.load(Ordering::Relaxed) {
+                    MAX => {
+                        write!($w, ",{}={}", $tag, v)
+                    }
+                    precision => {
+                        write!($w, ",{}={:.*}", $tag, precision, v)
+                    }
+                }
+            } else {
+                Ok(())
+            }
+        } else {
+            if Option::is_some($o) {
+                *$comma = true;
+            }
+            write_some_float_attribute!($w, $tag, $o)
+        }
+    };
     ($w:expr, $tag:expr, $o:expr) => {
         if let &Some(ref v) = $o {
             match WRITE_OPT_FLOAT_PRECISION.load(Ordering::Relaxed) {
@@ -1272,14 +1293,22 @@ impl ServerControl {
 
     pub(crate) fn write_to<T: Write>(&self, w: &mut T) -> std::io::Result<()> {
         write!(w, "#EXT-X-SERVER-CONTROL:")?;
-        write_some_float_attribute!(w, "CAN-SKIP-UNTIL", &self.can_skip_until)?;
+        let mut first_written = false;
+        write_some_float_attribute!(w, "CAN-SKIP-UNTIL", &self.can_skip_until, &mut first_written)?;
         if self.can_skip_dateranges {
-            write!(w, ",CAN-SKIP-DATERANGES=YES")?;
+            if first_written {
+                write!(w, ",")?;
+            }
+            write!(w, "CAN-SKIP-DATERANGES=YES")?;
+            first_written = true;
         }
-        write_some_float_attribute!(w, ",HOLD-BACK", &self.hold_back)?;
-        write_some_float_attribute!(w, ",PART-HOLD-BACK", &self.part_hold_back)?;
+        write_some_float_attribute!(w, "HOLD-BACK", &self.hold_back, &mut first_written)?;
+        write_some_float_attribute!(w, "PART-HOLD-BACK", &self.part_hold_back, &mut first_written)?;
         if self.can_block_reload {
-            write!(w, ",CAN-BLOCK-RELOAD=YES")?;
+            if first_written {
+                write!(w, ",")?;
+            }
+            write!(w, "CAN-BLOCK-RELOAD=YES")?;
         }
         writeln!(w)
     }
