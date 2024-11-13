@@ -484,6 +484,9 @@ fn media_playlist_from_tags(mut tags: Vec<MediaPlaylistTag>) -> MediaPlaylist {
                 SegmentTag::Part(p) => {
                     next_segment.parts.push(p);
                 }
+                SegmentTag::Gap => {
+                    next_segment.gap = true;
+                }
                 SegmentTag::Unknown(t) => {
                     next_segment.unknown_tags.push(t);
                 }
@@ -524,6 +527,7 @@ enum SegmentTag {
     Comment(Option<String>),
     Uri(String),
     Part(Part),
+    Gap,
 }
 
 fn media_segment_tag(i: &[u8]) -> IResult<&[u8], SegmentTag> {
@@ -551,6 +555,7 @@ fn media_segment_tag(i: &[u8]) -> IResult<&[u8], SegmentTag> {
             SegmentTag::DateRange(range)
         }),
         map(part_tag, SegmentTag::Part), // Ensure part_tag is integrated here
+        map(tag("#EXT-X-GAP"), |_| SegmentTag::Gap),
         map(ext_tag, SegmentTag::Unknown),
         map(comment_tag, SegmentTag::Comment),
         map(consume_line, SegmentTag::Uri),

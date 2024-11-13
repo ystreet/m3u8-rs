@@ -910,6 +910,8 @@ pub struct MediaSegment {
     pub program_date_time: Option<chrono::DateTime<chrono::FixedOffset>>,
     /// `#EXT-X-DATERANGE:<attribute-list>`
     pub daterange: Option<DateRange>,
+    /// `#EXT-X-GAP`
+    pub gap: bool,
     /// `#EXT-`
     pub unknown_tags: Vec<ExtTag>,
 
@@ -955,6 +957,9 @@ impl MediaSegment {
         }
         for part in &self.parts {
             part.write_to(w)?;
+        }
+        if self.gap {
+            writeln!(w, "#EXT-X-GAP")?;
         }
         for unknown_tag in &self.unknown_tags {
             writeln!(w, "{}", unknown_tag)?;
